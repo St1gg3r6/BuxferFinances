@@ -13,7 +13,6 @@ class BuxferAPI:
         self._http = PoolManager()
         self._base = 'https://www.buxfer.com/api'
         self._token = self._getToken()
-        self._accountNames = None
         self._accountBalances = None
         self._tags = None
         self._transactions = None
@@ -40,13 +39,6 @@ class BuxferAPI:
             print(f'An error occurred: {response['status'].replace('ERROR: ', '')}')
             sys.exit()
         return response
-
-
-    def _fetchAccounts(self):
-        url = self._base + '/accounts?token=' + self._token
-        req = self._http.request('GET', url)
-        response = self._checkError(req.data)
-        return response
     
 
     def _fetchTags(self):
@@ -61,17 +53,6 @@ class BuxferAPI:
         req = self._http.request('GET', url)
         response = self._checkError(req.data)
         return response
-    
-
-    @property
-    def accountNames(self):
-        if self._accountNames is None:
-            response = self._fetchAccounts()
-            self._accountNames = (pd.DataFrame(response['accounts'],
-                                               columns=['name'])
-                                               .sort_values('name')
-                                               .reset_index(drop=True))
-        return self._accountNames
     
 
     @property
@@ -159,16 +140,15 @@ class BuxferAPI:
 
 def main():
     buxfer = BuxferAPI()
-    print(buxfer.accountNames)
     # print(buxfer.accountBalances)
     # print(buxfer.tags)
     # buxfer.transactions.to_csv('transactions.csv')
     # buxfer.transactions_account('2A. Lloyds Main').to_csv('lloyds_main.csv', index=False)
     # buxfer.transactions_account('2A. Lloyds Main')
     # buxfer.transactions(page=0, account='Account')
-    # buxfer.transactions(page='all').to_csv('test.csv', index=False)
+    buxfer.transactions(page='all').to_csv('all_transactions.csv', index=False)
     # buxfer.transactions(account='8A. Chloë Current').to_csv('cu.csv', index=False)
-    buxfer.transactions(account='1A. Lloyds Main', page='all').to_csv('lloyds_main.csv', index=False)
+    # buxfer.transactions(account='2A. Lloyds Main', page='all').to_csv('lloyds_main.csv', index=False)
     sys.exit(0)
 
 
